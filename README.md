@@ -10,6 +10,14 @@
 
 ---
 
+## The intro
+
+![intro](screenshots/intro.png)
+
+*shark flash → "WE ARE PH0B14" typing animation*
+
+---
+
 ## Watch it work
 
 ![demo](demo.gif)
@@ -64,12 +72,11 @@ Honest split of what's tested vs. what isn't.
 
 ## The interface
 
-![menu](screenshots/menu.png)
-
 ![local network](screenshots/local-network.png)
 
 ![wifi menu](screenshots/wifi-menu.png)
----
+
+
 
 ## What it does
 
