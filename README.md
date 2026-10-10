@@ -4,7 +4,7 @@ All-in-one network attack framework. Wide TUI, 30+ modules, built in bash.
 
 > First all-in-one bash pentesting framework from Ethiopia.
 >
-> Created by **[@zeru.aep](https://tiktok.com/@zeru.aep)**
+> Created by **[@zeruaep](https://tiktok.com/@zeruaep)**
 
 ---
 
@@ -20,9 +20,9 @@ unified TUI with session management, credential vault, and automated attack chai
 
 ## Watch it in action
 
-- **Main account (editing)**: [tiktok.com/@zeru.aep](https://tiktok.com/@zeru.aep)
+- **Main account (editing)**: [tiktok.com/@zeruaep](https://tiktok.com/@zeruaep)
 - **PHOBIA demos**: [tiktok.com/@phobia_toolkit](https://tiktok.com/@phobia_toolkit)
-- **Instagram**: [instagram.com/zeru.aep](https://instagram.com/zeru.aep)
+- **Instagram**: [instagram.com/zeruaep](https://instagram.com/zeruaep)
 
 ---
 
@@ -192,11 +192,11 @@ MIT — see [LICENSE](LICENSE).
 
 ## Credits
 
-Built by **@zeru.aep** — Ethiopia, 2026.
+Built by **@zeruaep** — Ethiopia, 2026.
 
 Follow for updates:
-- TikTok: [@zeru.aep](https://tiktok.com/@zeru.aep) · [@phobia_toolkit](https://tiktok.com/@phobia_toolkit)
-- Instagram: [@zeru.aep](https://instagram.com/zeru.aep)
+- TikTok: [@zeruaep](https://tiktok.com/@zeruaep) · [@phobia_toolkit](https://tiktok.com/@phobia_toolkit)
+- Instagram: [@zeruaep](https://instagram.com/zeruaep)
 - GitHub: [PH0B14-toolkit](https://github.com/PH0B14-toolkit)
 
 **v1.0.0** — first public release. More coming.

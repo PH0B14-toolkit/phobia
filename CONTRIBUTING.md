@@ -49,7 +49,7 @@ is a great first PR.
 ## Security
 
 If you find a security issue in PHOBIA itself (not a tool it wraps), open a
-private issue or DM @zeru.aep. Don't publish exploits for PHOBIA publicly.
+private issue or DM @zeruaep. Don't publish exploits for PHOBIA publicly.
 
 ## Legal
 
