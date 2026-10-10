@@ -1,6 +1,6 @@
 # PHOBIA v1.0.4
 
-![PHOBIA demo](demo.gif)
+![PHOBIA — attack surface](screenshots/menu.png)
 
 **One script. 31 modules. Recon → exploit → own.**
 
@@ -8,11 +8,59 @@
 >
 > Created by **[@zeruaep](https://tiktok.com/@zeruaep)**
 
+---
+
+## Watch it work
+
+![demo](demo.gif)
+
+*opening the tool → navigating menus → running a network scan → returning to menu*
+
+---
+
 ## The 3 that matter
 
 - **[17] AUTO-PWN** — point at a target, full attack chain runs
 - **[22] Telegram C2** — persistent agents, control from your phone
 - **[30] Kerberos Chain** — AS-REP + Kerberoast + auto-crack
+
+---
+
+## Status: v1.0.4 — early release
+
+Honest split of what's tested vs. what isn't.
+
+### ✅ Stable — tested, working
+
+- WiFi scanning + handshake capture
+- Local Network scan + topology
+- MSF auto-scan (nmap → msfdb → module match)
+- Page Cloner (phishing template downloader)
+- Archive Cracker (ZIP / RAR / 7Z)
+- Hashcat Auto (hash type detection + crack)
+- SMB Enumeration
+- OSINT suite
+- Session management + credential vault + HTML reports
+- Tunnel Setup (ngrok / cloudflared)
+
+### ⚠️ Experimental — works, rougher edges
+
+- Evil Twin captive portal (iOS + Android ≤ 12 only — see Known Issues)
+- Kerberos Chain (needs valid DC on network)
+- Post-Exploit Kit (needs admin creds on target)
+- Cred Harvester (needs victim auth traffic on LAN)
+- SMB Crawler (depends on share permissions)
+- Telegram C2 (requires your own bot + token)
+
+### 🚧 In Progress — partial
+
+- Android 12+ captive portal support
+- Bluetooth classic scan (adapter-dependent)
+- Wireless Extended (KARMA, WPA3 — specific hardware required)
+
+**Full list:** [Known Issues](#known-issues)
+
+---
 
 ## The interface
 
@@ -21,7 +69,6 @@
 ![local network](screenshots/local-network.png)
 
 ![wifi menu](screenshots/wifi-menu.png)
-
 ---
 
 ## What it does
