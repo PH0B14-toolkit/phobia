@@ -105,3 +105,7 @@ pages/my-page.html
 pages/verified.html
 pages/bits-login.html.bak.*
 pages/.current
+
+# personal custom pages — never pushed
+pages/custom-login.html
+pages/custom-logo.png
