@@ -1,0 +1,86 @@
+# ================================================
+# PHOBIA — gitignore
+# DO NOT commit credentials, sessions, or logs
+# ================================================
+
+# session data (contains target IPs, creds, loot)
+sessions/
+logs/
+vault.db
+*.pot
+*.potfile
+
+# wordlists (huge, machine-specific)
+dictionaries/
+wordlists/
+*.txt
+!requirements.txt
+!README.md
+
+# handshakes / captures (personal data)
+handshakes/
+pmkids/
+passwords/
+*.cap
+*.pcap
+*.pcapng
+*.hc22000
+*.22000
+*.16800
+*.2500
+
+# pages & phishing templates (may contain personal data)
+pages/
+*.html
+!templates/*.html
+
+# backups (your personal history)
+*.bak
+*.backup*
+*.before_*
+*.BEFORE_*
+*.WORKING_*
+*.PERFECT_*
+*.broken_*
+
+# telegram / discord tokens
+config.enc
+n4_agents/
+*.agent
+
+# target lists (personal recon data)
+targets.txt
+lan_history.txt
+bt_history.txt
+history.txt
+
+# python cache
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# node stuff
+node_modules/
+ui/node_modules/
+ui/dist/
+*.log
+
+# env files
+phobia.env
+.env
+
+# internal backups folder
+_BACKUPS/
+pages.bak.*
+*.bak.*
+https_probe.py.bak.*
