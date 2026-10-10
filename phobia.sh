@@ -211,7 +211,7 @@ PMK_DIR="$BASE_DIR/pmkids"
 PW_DIR="$BASE_DIR/passwords"
 PAGES_DIR="$BASE_DIR/pages"
 LOGS_DIR="$BASE_DIR/logs"
-SHARK_FILE="$BASE_DIR/shark.txt"
+SKULL_FILE="$BASE_DIR/skull.txt"
 BT_HISTORY="$BASE_DIR/bt_history.txt"
 BACK_TO_MENU=0
 
@@ -397,9 +397,9 @@ show_intro() {
     [ -z "$COLS" ] && COLS=150
 
     local FRAME_A="" FRAME_B=""
-    if [ -f "$SHARK_FILE" ]; then
-        FRAME_A=$(awk '/^###FRAME###$/{exit} {print}' "$SHARK_FILE")
-        FRAME_B=$(awk 'f{print} /^###FRAME###$/{f=1}' "$SHARK_FILE")
+    if [ -f "$SKULL_FILE" ]; then
+        FRAME_A=$(awk '/^###FRAME###$/{exit} {print}' "$SKULL_FILE")
+        FRAME_B=$(awk 'f{print} /^###FRAME###$/{f=1}' "$SKULL_FILE")
     fi
     [ -z "$FRAME_B" ] && FRAME_B="$FRAME_A"
 
@@ -434,8 +434,8 @@ show_intro_main_frame() {
     COLS=$(tput cols 2>/dev/null); [ -z "$COLS" ] && COLS=150
 
     local FRAME_A=""
-    if [ -f "$SHARK_FILE" ]; then
-        FRAME_A=$(awk '/^###FRAME###$/{exit} {print}' "$SHARK_FILE")
+    if [ -f "$SKULL_FILE" ]; then
+        FRAME_A=$(awk '/^###FRAME###$/{exit} {print}' "$SKULL_FILE")
     fi
 
     local FRAME_W=$(( COLS - 4 ))
@@ -487,7 +487,7 @@ show_intro_main_frame() {
     top_line
     blank_line
 
-    # ---- shark Frame A inside box, above PH0B14 ----
+    # ---- skull Frame A inside box, above PH0B14 ----
     if [ -n "$FRAME_A" ]; then
         while IFS= read -r l; do
             [ -z "$l" ] && { blank_line; continue; }

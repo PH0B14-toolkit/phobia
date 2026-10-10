@@ -1,36 +1,91 @@
 # PHOBIA v1.0.4
 
-![PHOBIA — attack surface](screenshots/menu.png)
+<p align="center">
+  <img src="screenshots/menu.png" alt="PHOBIA attack surface" width="100%">
+</p>
 
-**One script. 31 modules. Recon → exploit → own.**
+<p align="center">
+  <b>One script. 31 modules. Recon → exploit → own.</b>
+</p>
 
-> First all-in-one bash pentesting framework from Ethiopia.
->
-> Created by **[@zeruaep](https://tiktok.com/@zeruaep)**
+<p align="center">
+  <a href="https://github.com/PH0B14-toolkit/phobia/stargazers"><img src="https://img.shields.io/github/stars/PH0B14-toolkit/phobia?style=for-the-badge&color=red" alt="Stars"></a>
+  <a href="https://github.com/PH0B14-toolkit/phobia/network/members"><img src="https://img.shields.io/github/forks/PH0B14-toolkit/phobia?style=for-the-badge&color=blue" alt="Forks"></a>
+  <a href="https://github.com/PH0B14-toolkit/phobia/issues"><img src="https://img.shields.io/github/issues/PH0B14-toolkit/phobia?style=for-the-badge&color=yellow" alt="Issues"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/PH0B14-toolkit/phobia/releases"><img src="https://img.shields.io/github/v/release/PH0B14-toolkit/phobia?style=for-the-badge&color=purple" alt="Release"></a>
+  <img src="https://img.shields.io/badge/platform-Linux%20%7C%20Kali-important?style=for-the-badge" alt="Platform">
+  <img src="https://img.shields.io/badge/language-Bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white" alt="Bash">
+</p>
+
+<p align="center">
+  <i>First all-in-one bash pentesting framework from Ethiopia 🇪🇹</i><br>
+  Created by <a href="https://tiktok.com/@zeruaep"><b>@zeruaep</b></a>
+</p>
+
+---
+
+## Table of Contents
+
+- [The intro](#the-intro)
+- [Watch it work](#watch-it-work)
+- [The 3 that matter](#the-3-that-matter)
+- [Status: v1.0.4](#status-v104--early-release)
+- [Install](#install)
+- [Requirements](#requirements)
+- [Modules (full list)](#modules)
+- [Configuration](#config-phobiaenv)
+- [Known Issues](#known-issues)
+- [Contributing](#contributing)
+- [License](#license)
+- [Credits](#credits)
 
 ---
 
 ## The intro
 
-![intro](screenshots/intro.png)
+<p align="center">
+  <img src="screenshots/intro.png" alt="PHOBIA intro" width="85%">
+</p>
 
-*shark flash → "WE ARE PH0B14" typing animation*
+<p align="center"><i>skull flash → "WE ARE PH0B14" typing animation</i></p>
 
 ---
 
 ## Watch it work
 
-![demo](demo.gif)
+<p align="center">
+  <img src="demo.gif" alt="PHOBIA demo" width="100%">
+</p>
 
-*opening the tool → navigating menus → running a network scan → returning to menu*
+<p align="center"><i>opening the tool → navigating menus → running a network scan → returning to menu</i></p>
 
 ---
 
 ## The 3 that matter
 
-- **[17] AUTO-PWN** — point at a target, full attack chain runs
-- **[22] Telegram C2** — persistent agents, control from your phone
-- **[30] Kerberos Chain** — AS-REP + Kerberoast + auto-crack
+<table>
+<tr>
+<td width="33%">
+
+### 🎯 [17] AUTO-PWN
+Point at a target. Full attack chain runs.
+
+</td>
+<td width="33%">
+
+### 📡 [22] Telegram C2
+Persistent agents. Control from your phone.
+
+</td>
+<td width="33%">
+
+### 🔓 [30] Kerberos Chain
+AS-REP + Kerberoast + auto-crack.
+
+</td>
+</tr>
+</table>
 
 ---
 
@@ -72,11 +127,22 @@ Honest split of what's tested vs. what isn't.
 
 ## The interface
 
-![local network](screenshots/local-network.png)
+<table>
+<tr>
+<td width="50%">
 
-![wifi menu](screenshots/wifi-menu.png)
+![Local Network](screenshots/local-network.png)
+<p align="center"><i>Local Network submenu</i></p>
 
+</td>
+<td width="50%">
 
+![WiFi menu](screenshots/wifi-menu.png)
+<p align="center"><i>WiFi attack menu</i></p>
+
+</td>
+</tr>
+</table>
 
 ## What it does
 
