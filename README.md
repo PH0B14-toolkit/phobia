@@ -1,10 +1,26 @@
-# PHOBIA v1.0.0
+# PHOBIA v1.0.4
 
-All-in-one network attack framework. Wide TUI, 30+ modules, built in bash.
+![PHOBIA demo](demo.gif)
+
+**One script. 31 modules. Recon → exploit → own.**
 
 > First all-in-one bash pentesting framework from Ethiopia.
 >
 > Created by **[@zeruaep](https://tiktok.com/@zeruaep)**
+
+## The 3 that matter
+
+- **[17] AUTO-PWN** — point at a target, full attack chain runs
+- **[22] Telegram C2** — persistent agents, control from your phone
+- **[30] Kerberos Chain** — AS-REP + Kerberoast + auto-crack
+
+## The interface
+
+![menu](screenshots/menu.png)
+
+![local network](screenshots/local-network.png)
+
+![wifi menu](screenshots/wifi-menu.png)
 
 ---
 
