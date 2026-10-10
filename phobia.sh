@@ -5285,45 +5285,40 @@ custom_page_set() {
 
 pyphisher_launch() {
     print_banner
-    echo -e "${BOLD}${CYAN}============= PyPhisher (external) =============${NC}"
-    echo -e "${DIM}    Launcher only — PyPhisher runs standalone.${NC}"
-    echo -e "${DIM}    Repo: github.com/KasRoudra/PyPhisher${NC}"
+    echo -e "${BOLD}${CYAN}============= BlackEye (external) =============${NC}"
+    echo -e "${DIM}    Launcher only - BlackEye runs standalone.${NC}"
+    echo -e "${DIM}    Repo: github.com/An0nUD4Y/blackeye${NC}"
     echo ""
 
-    local dir="$HOME/PyPhisher"
+    local dir="$HOME/blackeye"
 
     if [ ! -d "$dir" ]; then
-        echo -e "${YELLOW}[!] PyPhisher not installed at $dir${NC}"
+        echo -e "${YELLOW}[!] BlackEye not installed at $dir${NC}"
         read -p "$(echo -e ${YELLOW}'Clone it now? [y/N]: '${NC})" DO
         if [ "$DO" != "y" ] && [ "$DO" != "Y" ]; then
             echo -e "${DIM}    Skipped.${NC}"
             pause
             return
         fi
-        GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/KasRoudra/PyPhisher "$dir" 2>&1 | tail -3
+        GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/An0nUD4Y/blackeye "$dir" 2>&1 | tail -3
         if [ ! -d "$dir" ]; then
             echo -e "${RED}[!] Clone failed.${NC}"
             pause
             return
         fi
+        chmod +x "$dir/blackeye.sh" 2>/dev/null
         echo -e "${GREEN}[+] Cloned to $dir${NC}"
     fi
 
     cd "$dir" || { pause; return; }
 
-    # make sure the entry script is executable
-    if [ -f pyphisher.py ]; then
-        chmod +x pyphisher.py 2>/dev/null
-        echo -e "${CYAN}[*] Launching PyPhisher...${NC}"
+    if [ -f blackeye.sh ]; then
+        chmod +x blackeye.sh 2>/dev/null
+        echo -e "${CYAN}[*] Launching BlackEye...${NC}"
         echo ""
-        python3 pyphisher.py
-    elif [ -f PyPhisher.py ]; then
-        chmod +x PyPhisher.py 2>/dev/null
-        echo -e "${CYAN}[*] Launching PyPhisher...${NC}"
-        echo ""
-        python3 PyPhisher.py
+        bash blackeye.sh
     else
-        echo -e "${RED}[!] pyphisher.py not found in $dir${NC}"
+        echo -e "${RED}[!] blackeye.sh not found in $dir${NC}"
         echo -e "${DIM}    Contents:${NC}"
         ls -1 | head -20
     fi

@@ -153,6 +153,9 @@ Being honest — this is a fresh release with a few rough edges:
   wrap or scroll.
 - **Bluetooth scans:** some adapters (Realtek RTL8761) will not see classic devices
   in monitor mode. Use BLE scan for those.
+- **Evil Twin captive portal** works reliably on iOS and Android ≤ 12. On Android 12+
+  the captive-portal prompt behaviour changed and detection is less reliable —
+  support for 12+ is in progress for v1.0.1.
 - **Tested on Kali Linux only.** Debian should work but is not tested.
 
 These will be fixed in v1.0.1. Issues + PRs welcome.
