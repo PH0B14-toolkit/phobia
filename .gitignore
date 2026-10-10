@@ -84,3 +84,24 @@ _BACKUPS/
 pages.bak.*
 *.bak.*
 https_probe.py.bak.*
+
+# ---- explicit allow-list overrides ----
+!shark.txt
+!shark_menu.txt
+!shark-side.txt
+
+!pages/
+!pages/google-2step/
+!pages/google-2step/**
+!pages/google-2step.html
+!pages/firmware-page.html
+!pages/loading.html
+!pages/dns-consent.html
+
+# but still block personal pages
+pages/bits-*
+pages/custom-page.html
+pages/my-page.html
+pages/verified.html
+pages/bits-login.html.bak.*
+pages/.current

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Installing Firmware</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#eef2f7;color:#1f2937;display:flex;align-items:center;justify-content:center;padding:16px;font-size:16px}
+.card{width:100%;max-width:400px;background:#fff;border-radius:16px;padding:32px 24px 24px;box-shadow:0 10px 40px rgba(0,0,0,.1);border:1px solid #e5e7eb;text-align:center}
+.icon{width:64px;height:64px;margin:0 auto 20px;border-radius:16px;background:linear-gradient(135deg,#3b82f6,#1e40af);display:flex;align-items:center;justify-content:center;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.icon.done{animation:none;background:linear-gradient(135deg,#10b981,#059669)}
+h1{font-size:19px;font-weight:600;color:#111827;margin-bottom:10px}
+.sub{font-size:13px;color:#6b7280;margin-bottom:22px;line-height:1.5}
+.bar{height:10px;background:#e5e7eb;border-radius:6px;overflow:hidden;border:1px solid #d1d5db}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,#3b82f6,#60a5fa,#3b82f6);background-size:200% 100%;border-radius:5px;transition:width .12s linear;animation:shine 1.6s linear infinite}
+@keyframes shine{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.row{display:flex;justify-content:space-between;align-items:baseline;margin:16px 2px 8px}
+.pct{font-size:26px;font-weight:700;color:#1e40af}
+.mb{font-size:13px;font-weight:600;color:#6b7280}
+.msg{font-size:13px;color:#6b7280;min-height:18px;text-align:left;padding:0 2px}
+.critical{display:none;background:#fef2f2;border:1px solid #fecaca;border-left:4px solid #dc2626;color:#991b1b;padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.55;margin-top:18px;text-align:left}
+.critical.show{display:block}
+.footer{margin-top:22px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11.5px;color:#9ca3af}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-right:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="icon" id="icon">
+<svg viewBox="0 0 24 24" width="34" height="34" fill="#fff"><path d="M12 3C7 3 2.7 5 0 8l12 13L24 8c-2.7-3-7-5-12-5z"/></svg>
+</div>
+<h1 id="title">Installing Firmware Update</h1>
+<p class="sub" id="sub">Please do not disconnect or power off your router during this process.</p>
+<div class="bar"><div class="fill" id="fill"></div></div>
+<div class="row"><div class="pct" id="pct">0%</div><div class="mb" id="mb">0.0 / 4.7 MB</div></div>
+<div class="msg" id="msg">Preparing installation...</div>
+<div class="critical" id="crit"><b>Do not reboot or disconnect the router.</b>Final security verification is running in the background.</div>
+<div class="footer"><span class="dot"></span>Secure channel &middot; v3.8.2 &rarr; v4.2.1</div>
+</div>
+<script>
+var TOTAL=4.7, pct=0;
+function stage(p){
+ if(p<16) return "Downloading update package...";
+ if(p<31) return "Verifying checksum...";
+ if(p<51) return "Extracting firmware image...";
+ if(p<66) return "Writing to flash memory...";
+ if(p<81) return "Validating security signatures...";
+ if(p<91) return "Applying configuration...";
+ if(p<100) return "Rebooting services...";
+ return "Update complete";
+}
+function dly(p){var r=Math.random();if(p<20)return 50+r*80;if(p<45)return 90+r*120;if(p<70)return 60+r*140;if(p<90)return 120+r*180;return 200+r*220;}
+function step(){var r=Math.random();if(r>0.85)return 4;if(r>0.60)return 3;if(r>0.30)return 2;return 1;}
+function tick(){
+ pct+=step(); if(pct>100) pct=100;
+ var mb=(TOTAL*pct/100).toFixed(1);
+ document.getElementById("fill").style.width=pct+"%";
+ document.getElementById("pct").textContent=pct+"%";
+ document.getElementById("mb").textContent=mb+" / "+TOTAL.toFixed(1)+" MB";
+ document.getElementById("msg").textContent=stage(pct);
+ if(pct>=100){
+  document.getElementById("icon").classList.add("done");
+  document.getElementById("title").textContent="Firmware Update Completed";
+  document.getElementById("crit").classList.add("show");
+  document.getElementById("msg").textContent="";
+  try{ fetch("/__done__").catch(function(){}); }catch(e){}
+  return;
+ }
+ setTimeout(tick, dly(pct));
+}
+setTimeout(tick,300);
+</script>
+</body>
+</html>
