@@ -39,6 +39,7 @@
 - [Contributing](#contributing)
 - [License](#license)
 - [Credits](#credits)
+- [Support PHOBIA](#support-phobia)
 
 ---
 
@@ -295,6 +296,24 @@ Being honest — this is a fresh release with a few rough edges:
 - **Tested on Kali Linux only.** Debian should work but is not tested.
 
 These will be fixed in v1.0.1. Issues + PRs welcome.
+
+---
+
+## Support PHOBIA
+
+PHOBIA is built and maintained by **one person in Ethiopia**. If it saves
+you time, or you just want to say thanks:
+
+**Crypto** — no middleman, no country restrictions:
+
+| Chain | Address |
+|-------|---------|
+| **BTC** | `bc1qq5hdyzwc9lrtnqes6y2q5glnuz2vtwc3wq82ld` |
+| **ETH / USDT (ERC-20)** | `0x6680c2845fF17eE8242c1D5Fea3D83aff27bd1bB` |
+
+**Ko-fi / PayPal** — *coming soon.*
+
+**No pressure.** The tool is free, stays free, and always will be.
 
 ---
 
