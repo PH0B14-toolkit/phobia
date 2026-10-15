@@ -109,3 +109,22 @@ pages/.current
 # personal custom pages — never pushed
 pages/custom-login.html
 pages/custom-logo.png
+
+# ---- allow empty folders via .gitkeep ----
+!**/.gitkeep
+
+# ---- personal/private folders — NEVER pushed ----
+_BACKUPS/
+n4_agents/
+sessions/*
+logs/*
+handshakes/*
+passwords/*
+pmkids/*
+dictionaries/*
+!sessions/.gitkeep
+!logs/.gitkeep
+!handshakes/.gitkeep
+!passwords/.gitkeep
+!pmkids/.gitkeep
+!dictionaries/.gitkeep
